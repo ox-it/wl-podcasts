@@ -4,7 +4,7 @@
 	<tool
 			id="sakai.podcasts"
 			title="Podcasts"
-			description="For managing individual podcast and podcast feed information.">
+			description="For uploading audio and video files to creating a secure 'podcast feed (RSS)'">
 			
 		<category name="course" />
 		<category name="project" />
