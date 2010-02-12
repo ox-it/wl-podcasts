@@ -94,14 +94,7 @@
         	  <param-value>true</param-value>
         </init-param> -->
      </filter>
-  <filter-mapping>
-        <filter-name>sakai.request</filter-name>
-        <servlet-name>podcasts</servlet-name>
-        <dispatcher>REQUEST</dispatcher>
-        <dispatcher>FORWARD</dispatcher>
-        <dispatcher>INCLUDE</dispatcher>
-    </filter-mapping>
- 
+
     <filter-mapping>
         <filter-name>sakai.request</filter-name>
         <servlet-name>Faces Servlet</servlet-name>
