@@ -21,7 +21,6 @@
 
 package org.sakaiproject.component.app.podcasts;
 
-import static org.sakaiproject.component.app.podcasts.Utilities.checkSet;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -35,7 +34,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.sakaiproject.api.app.podcasts.PodcastPermissionsService;
 import org.sakaiproject.api.app.podcasts.PodcastService;
-import org.sakaiproject.api.app.podcasts.exception.PodcastException;
 import org.sakaiproject.authz.api.SecurityAdvisor;
 import org.sakaiproject.authz.api.SecurityService;
 import org.sakaiproject.content.api.ContentCollection;
@@ -1639,7 +1637,7 @@ public class PodcastServiceImpl implements PodcastService {
 	protected void enablePodcastSecurityAdvisor() {
 		// put in a security advisor so we can do our podcast work without need
 		// of further permissions
-		securityService.pushAdvisor(new SecurityAdvisor() {
+		SecurityService.pushAdvisor(new SecurityAdvisor() {
 			public SecurityAdvice isAllowed(String userId, String function,
 					String reference) {
 				return SecurityAdvice.ALLOWED;
@@ -1655,11 +1653,11 @@ public class PodcastServiceImpl implements PodcastService {
 				ContentCollection parentCollection = contentHostingService.getCollection(folderId).getContainingCollection();
 				return !contentHostingService.isPubView(parentCollection.getId());
 			}catch(IdUnusedException e){
-				LOG.error("Shouldn't happen as folder should have already been created.", e);
+				LOG.warn("Shouldn't happen as folder should have already been created.", e);
 			}catch(PermissionException e){
-				LOG.error("Shouldn't happen as folder should have already been created correctly.", e);
+				LOG.warn("Shouldn't happen as folder should have already been created correctly.", e);
 			}catch(TypeException e){
-				LOG.error("Shouldn't happen as folder should have already been created correctly.", e);
+				LOG.warn("Shouldn't happen as folder should have already been created correctly.", e);
 			}
 		} else if (option == PUBLIC) {
 			// No special rules at the moment.
