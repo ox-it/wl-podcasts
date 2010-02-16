@@ -655,13 +655,7 @@ public class BasicPodfeedService implements PodfeedService {
 						podcastMap.put("guid", fileUrl);
 						final String podcastFolderId = podcastService.retrievePodcastFolderId(siteId);
 						securityService.popAdvisor();
-						
-						// if site Display to Site, need to access actual podcasts thru Dav servlet
-						// so change item URLs to do so
-						if (!podcastService.isPublic(podcastFolderId)) {
-							fileUrl = convertToDavUrl(fileUrl);
-						}
-					
+
 						podcastMap.put("url", fileUrl);
 						podcastMap.put("description",podcastProperties.getPropertyFormatted(ResourceProperties.PROP_DESCRIPTION));
 						podcastMap.put("author", podcastProperties.getPropertyFormatted(ResourceProperties.PROP_CREATOR));
@@ -877,28 +871,6 @@ public class BasicPodfeedService implements PodfeedService {
 		}
 		
 		return podcastFolderId;
-
-	}
-
-	/**
-	 * If site is Display to Site, need to retrieve files thru dav servlet.
-	 * This converts a podcast URL to accomplish this.
-	 * 
-	 * @param fileUrl
-	 * 			The current file URL. Access is through content.
-	 * 
-	 * @return String
-	 * 			The changed URL that points to the dav servlet.
-	 */
-	private String convertToDavUrl(String fileUrl) {
-        // Compile regular expression
-        Pattern pattern = Pattern.compile("access/content/group");
-
-        // Replace all occurrences of pattern in input
-        Matcher matcher = pattern.matcher(fileUrl);
-        fileUrl = matcher.replaceAll("dav");
-
-		return fileUrl;
 
 	}
 
