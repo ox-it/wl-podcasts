@@ -44,12 +44,11 @@ public class podOptionsBean {
   private static final int SITE = 1;
   private static final String OPTIONS_PUBLIC = "options_public";
   private static final String OPTIONS_SITE = "options_site";
+  private static final String OPTIONS_SITE_DISABLED = "options_site_disabled";
   private static final String CHANGE_TO_SITE = "option_change_confirm";
   
-  private SelectItem [] displayItems = new SelectItem [] {
-    new SelectItem(new Integer(PUBLIC), rb.getString(OPTIONS_PUBLIC)),
-    new SelectItem(new Integer(SITE), rb.getString(OPTIONS_SITE))
-  };
+  // Initialised the first time.
+  private SelectItem [] displayItems = null;
   
   public podOptionsBean() {
 		podOption = 0;
@@ -67,6 +66,14 @@ public class podOptionsBean {
 
 	/** Returns the options of what the podcast folder can be set to **/
 	public SelectItem[] getDisplayItems() {
+		if (displayItems == null) {
+			boolean publicDisabled = !podcastService.allowOptions(PUBLIC);
+			boolean siteDisabled = !podcastService.allowOptions(SITE);
+			displayItems = new SelectItem [] {
+					new SelectItem(new Integer(PUBLIC), rb.getString(OPTIONS_PUBLIC), null, publicDisabled),
+					new SelectItem(new Integer(SITE), rb.getString((siteDisabled)?OPTIONS_SITE_DISABLED:OPTIONS_SITE),null, siteDisabled),
+			};
+		}
 		return displayItems;
 	}
 
