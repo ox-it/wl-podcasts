@@ -21,6 +21,7 @@
 
 package org.sakaiproject.component.app.podcasts;
 
+import static org.sakaiproject.component.app.podcasts.Utilities.checkSet;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -34,6 +35,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.sakaiproject.api.app.podcasts.PodcastPermissionsService;
 import org.sakaiproject.api.app.podcasts.PodcastService;
+import org.sakaiproject.api.app.podcasts.exception.PodcastException;
 import org.sakaiproject.authz.api.SecurityAdvisor;
 import org.sakaiproject.authz.api.SecurityService;
 import org.sakaiproject.content.api.ContentCollection;
@@ -272,7 +274,7 @@ public class PodcastServiceImpl implements PodcastService {
 	/**
 	 * Get ContentCollection object for podcasts
 	 * 
-	 * @param String
+	 * @param siteId
 	 *            The siteId to grab the correct podcasts
 	 * 
 	 * @return ContentCollection The ContentCollection object containing the
@@ -317,7 +319,7 @@ public class PodcastServiceImpl implements PodcastService {
 	/**
 	 * Get ContentCollection object for podcasts
 	 * 
-	 * @param String
+	 * @param siteId
 	 *            The siteId to grab the correct podcasts
 	 *            
 	 * @return ContentCollection 
@@ -443,7 +445,7 @@ public class PodcastServiceImpl implements PodcastService {
 	 * Returns TRUE if the possible id is the correct one. If they
 	 * cannot access an Exception will be thrown.
 	 * Created for SAK-13740
-	 * @param podcastCollection
+	 * @param podcastsCollection
 	 * @param siteId
 	 * @param isStudent
 	 * @return
@@ -597,7 +599,7 @@ public class PodcastServiceImpl implements PodcastService {
 	 * Retrieve Podcasts for site and if podcast folder does not exist, create
 	 * it. Used by feed since no context to pull siteId from
 	 * 
-	 * @param String
+	 * @param siteId
 	 *            	The siteId the feed needs the podcasts from
 	 * 
 	 * @return List
@@ -655,7 +657,7 @@ public class PodcastServiceImpl implements PodcastService {
 	/**
 	 * Pulls a ContentResource from ContentHostingService.
 	 * 
-	 * @param String
+	 * @param resourceId
 	 *            	The resourceId of the resource to get
 	 *            
 	 * @return ContentResource
@@ -681,7 +683,7 @@ public class PodcastServiceImpl implements PodcastService {
 	/**
 	 * Pulls a ContentResourceEdit from ContentHostingService.
 	 * 
-	 * @param String
+	 * @param resourceId
 	 *            	The resourceId of the resource to get
 	 *            
 	 * @return ContentResourceEdit 
@@ -811,7 +813,7 @@ public class PodcastServiceImpl implements PodcastService {
 	/**
 	 * Removes a podcast
 	 * 
-	 * @param id
+	 * @param resourceId
 	 *            The podcast to be removed from ContentHosting
 	 */
 	public void removePodcast(String resourceId) throws IdUnusedException,
@@ -898,17 +900,17 @@ public class PodcastServiceImpl implements PodcastService {
 	/**
 	 * Will apply changes made (if any) to podcast
 	 * 
-	 * @param String
+	 * @param resourceId
 	 *            The resourceId
-	 * @param String
+	 * @param title
 	 *            The title
-	 * @param Date
+	 * @param date
 	 *            The display/publish date
-	 * @param String
+	 * @param description
 	 *            The description
-	 * @param byte[]
+	 * @param body
 	 *            The actual file contents
-	 * @param String
+	 * @param filename
 	 *            The filename
 	 */
 	public void revisePodcast(String resourceId, String title, Date date,
@@ -1011,7 +1013,7 @@ public class PodcastServiceImpl implements PodcastService {
 	 * Checks if podcast resources have a DISPLAY_DATE set. Occurs when files
 	 * uploaded to podcast folder from Resources.
 	 * 
-	 * @param List
+	 * @param resourcesList
 	 *            The list of podcast resources
 	 * 
 	 * @return List The list of podcast resource all with DISPLAY_DATE property
@@ -1175,7 +1177,7 @@ public class PodcastServiceImpl implements PodcastService {
 	 * Needed if file added using Resources. Time stored is GMT so when pulled
 	 * need to convert to local.
 	 * 
-	 * @param ResourceProperties
+	 * @param resourceId
 	 *            The ResourceProperties that need DISPLAY_DATE added
 	 */
 	public ContentResource setDISPLAY_DATE(String resourceId, Time releaseDate) {
@@ -1235,7 +1237,7 @@ public class PodcastServiceImpl implements PodcastService {
 	 * and if it does, return it so it can be set as the Release Date.
 	 * If DISPLAY_DATE does not exist, default to last modified date.
 	 * 
-	 * @param ResourceProperties
+	 * @param rp
 	 *            The ResourceProperties to get DISPLAY_DATE from
 	 */
 	public Time getDISPLAY_DATE(ResourceProperties rp) {
@@ -1331,7 +1333,7 @@ public class PodcastServiceImpl implements PodcastService {
 	/**
 	 * Returns the file's URL
 	 * 
-	 * @param String
+	 * @param resourceId
 	 *            The resource Id
 	 * 
 	 * @return String The URL for the resource
@@ -1388,7 +1390,7 @@ public class PodcastServiceImpl implements PodcastService {
 	/**
 	 * Changes the podcast folder view status (either PUBLIC or SITE)
 	 * 
-	 * @param boolean
+	 * @param option
 	 *            True means PUBLIC view, FALSE means private
 	 */
 	public void reviseOptions(boolean option) {
@@ -1458,7 +1460,7 @@ public class PodcastServiceImpl implements PodcastService {
 	/**
 	 * Commits changes to ContentHosting (releases the lock)
 	 * 
-	 * @param ContentCollectionEdit
+	 * @param cce
 	 *            The ContentCollection to be saved
 	 */
 	public void commitContentCollection(ContentCollectionEdit cce) {
@@ -1637,7 +1639,7 @@ public class PodcastServiceImpl implements PodcastService {
 	protected void enablePodcastSecurityAdvisor() {
 		// put in a security advisor so we can do our podcast work without need
 		// of further permissions
-		SecurityService.pushAdvisor(new SecurityAdvisor() {
+		securityService.pushAdvisor(new SecurityAdvisor() {
 			public SecurityAdvice isAllowed(String userId, String function,
 					String reference) {
 				return SecurityAdvice.ALLOWED;
